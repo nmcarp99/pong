@@ -1,0 +1,49 @@
+body {
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.startButton {
+  padding: 20px;
+  font-size: 40px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #00FF00;
+  border: white solid 5px;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.1s ease;
+}
+.startButton:hover {
+  filter: brightness(70%);
+}
+.startButton:active {
+  filter: brightness(50%);
+}
+
+.paddle {
+  width: 15px;
+  height: 60px;
+  position: relative;
+  background: #00FF00;
+  margin: 0 20px;
+}
+
+.game {
+  background: #222222;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.ball {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  background: white;
+  border-radius: 20px;
+}
