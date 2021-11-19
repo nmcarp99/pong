@@ -1,9 +1,14 @@
 body {
   background: black;
+  margin: 0;
+  background: #222222;
+}
+.mainContent {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100%;
   margin: 0;
 }
 .startButton {
@@ -14,7 +19,7 @@ body {
   background: transparent;
   color: #00FF00;
   border: white solid 5px;
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   transition: all 0.1s ease;
 }
 .startButton:hover {
@@ -23,27 +28,60 @@ body {
 .startButton:active {
   filter: brightness(50%);
 }
-
-.paddle {
-  width: 15px;
-  height: 60px;
-  position: relative;
-  background: #00FF00;
-  margin: 0 20px;
-}
-
 .game {
-  background: #222222;
-  width: 100%;
+  border: 5px white solid;
+}
+.noScrollBars {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.noScrollBars::-webkit-scrollbar {
+  display: none;
+}
+.extraBox {
+  background: rgba(0, 0, 0, 0.8);
+  border: 5px white solid;
+  color: white;
+  position: fixed;
+  font-family: "Orbitron", sans-serif;
+  height: 200px;
+  width: 285px;
+  overflow: scroll;
+  top: 10px;
   display: flex;
-  justify-content: space-between;
-  overflow: hidden;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.extraBox h1 {
+  margin-bottom: 4px;
+}
+.extraBox h4 {
+  padding: 2px 20px;
+}
+.extraBox input {
+  margin: auto 0 10px;
+  width: 80%;
+  height: 30px;
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+.extraBox div {
+  width: 80%;
+  height: 83px;
+  background: rgba(170, 170, 170, 0.3);
+  overflow: scroll;
+}
+.userList {
+  right: 10px;
+}
+.chat {
+  left: 10px;
 }
 
-.ball {
-  width: 20px;
-  height: 20px;
-  position: absolute;
-  background: white;
-  border-radius: 20px;
+@media only screen and (max-width: 600px) {
+  .chat {
+    display: none;
+  }
 }
