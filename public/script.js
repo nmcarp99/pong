@@ -51,6 +51,10 @@ socket.on("updateBody", body => {
   }
 });
 
+socket.on("updateScores", newScore => {
+  document.getElementById("scores").innerHTML = newScore;
+});
+
 socket.on("setScreenSize", newSize => {
   while (!game) {}
 
@@ -102,6 +106,14 @@ socket.on("updatePositions", positions => {
     paddleHeight
   );
   gameContext.fill();
+  
+  gameContext.strokeStyle = "#00FF00";
+  
+  gameContext.beginPath();
+  gameContext.setLineDash([5]);
+  gameContext.moveTo(game.width / 2, 0);
+  gameContext.lineTo(game.width / 2, game.height);
+  gameContext.stroke();
 });
 
 socket.on("updateUserList", userList => {
@@ -129,5 +141,5 @@ window.addEventListener("load", () => {
   document.getElementById("message").addEventListener("keydown", handleMessageKeyPress);
 });
 window.addEventListener("beforeunload", event => {
-  event.returnValue = false;
+  event.returnValue = true;
 });

@@ -38,11 +38,16 @@ function getBallDirection(room) {
   let screenSize = rooms[room][smallestScreen[room]].size;
 
   // check if ball is outside the map
-  if (
-    ballPos[0] - ballRadius <= 0 ||
-    ballPos[0] + ballRadius >= screenSize[0]
-  ) {
+  if (ballPos[0] - ballRadius <= 0) {
+    gameData[room].player2Score++;
     resetGameData(room);
+    io.to(room).emit("updateScores", gameData[room].player1Score + " - " + gameData[room].player2Score);
+    return [ballSpeed, 0];
+  } else if (ballPos[0] + ballRadius >= screenSize[0]) {
+    gameData[room].player1Score++;
+    resetGameData(room);
+    io.to(room).emit("updateScores", gameData[room].player1Score + " - " + gameData[room].player2Score);
+    return [ballSpeed, 0];
   }
 
   // check for collision with top or bottom
@@ -98,15 +103,19 @@ function getBallDirection(room) {
 function resetGameData(room) {
   let screenSize = rooms[room][smallestScreen[room]].size;
 
-  gameData[room] = {
-    player1Pos: 0,
-    player2Pos: 0,
-    ups: [0, 0],
-    downs: [0, 0],
-    ballPos: [0, 0],
-    ballDirection: [0, 0],
-    updateInterval: undefined
-  };
+  if (gameData[room] == undefined) {
+    gameData[room] = {
+      player1Pos: 0,
+      player2Pos: 0,
+      ups: [0, 0],
+      downs: [0, 0],
+      ballPos: [0, 0],
+      ballDirection: [0, 0],
+      updateInterval: undefined,
+      player1Score: 0,
+      player2Score: 0
+    };
+  }
 
   gameData[room].player1Pos = screenSize[1] / 2;
   gameData[room].player2Pos = screenSize[1] / 2;
@@ -139,7 +148,7 @@ io.on("connection", socket => {
     if (gameData[room] && gameData[room].playerLeft) {
       rooms[room] = [];
     }
-    
+
     if (rooms[room] && rooms[room].length == 2) {
       socket.emit("failedJoin", "Room is already full.");
       return;
@@ -280,7 +289,7 @@ io.on("connection", socket => {
     if (gameData[socket.room] && gameData[socket.room].updateInterval) {
       clearInterval(gameData[socket.room].updateInterval);
     }
-    
+
     gameData[socket.room].playerLeft = true;
 
     socket.to(socket.room).emit("playerLeft");
