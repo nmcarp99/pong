@@ -128,3 +128,6 @@ window.addEventListener("keyup", handleKeyEvent);
 window.addEventListener("load", () => {
   document.getElementById("message").addEventListener("keydown", handleMessageKeyPress);
 });
+window.addEventListener("beforeunload", event => {
+  event.returnValue = false;
+});
