@@ -47,7 +47,6 @@ body {
   height: 200px;
   width: 285px;
   overflow: scroll;
-  top: 10px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -75,9 +74,24 @@ body {
 }
 .userList {
   right: 10px;
+  top: 10px;
 }
 .chat {
   left: 10px;
+  top: 10px;
+}
+.scores {
+  width: 300px;
+  height: 200px;
+  position: fixed;
+  bottom: 10px;
+  left: calc(50vw - 150px);
+  justify-content: center;
+}
+.scores h1 {
+  font-size: 90px;
+  padding: 0;
+  margin: 0;
 }
 
 @media only screen and (max-width: 600px) {
