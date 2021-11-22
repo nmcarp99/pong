@@ -1,3 +1,32 @@
+const botRoasts = [
+  "Bot: Wow, you couldn't even find anyone to play pong with you? I thought I was lame...",
+  "Bot: Wow, even I have more friends than you...",
+  "Bot: I have so many friends that I have to play multiple games at a time...",
+  "Bot: Where's your friend?",
+  "Bot: Don't have any friends I see... Don't worry. I'll go easy on you."
+];
+
+const botScoreMessages = [
+  "Bot: Wow, you're just that bad...",
+  "Bot: I could do this in my sleep.",
+  "Bot: Wow, I don't think you could beat a calculator.",
+  "Bot: Oh come on, try this time.",
+  "Bot: What are you doing?",
+  "Bot: Too easy.",
+  "Bot: Go play with one of your puny human friends... If only you had any...",
+  "Bot: Shouldn't you be doing schoolwork?",
+  "Bot: Pay attention!!!"
+];
+
+const botLoseMessages = [
+  "Bot: Obviously I'm not trying...",
+  "Bot: I hope you realize that I've been programmed to fail...",
+  "Bot: Pffft... That was on purpose.",
+  "Bot: Now now, go easy on me, alright?",
+  "Bot: Don't try too hard now...",
+  "Bot: Now try to beat another one of those peskey humans you call friends... Oh wait! You don't have any."
+];
+
 const paddleMargin = 20;
 const paddleHeight = 60;
 const paddleWidth = 20;
@@ -6,9 +35,11 @@ const ballRadius = 10;
 const port = 8080;
 
 const speed = 4;
+const botSpeed = 2;
 const angleFactor = 0.07;
 const ballSpeed = 7;
 const refreshDelay = 10;
+const scoreLimit = 10;
 
 // import all dependencies
 var fs = require("fs");
@@ -39,14 +70,57 @@ function getBallDirection(room) {
 
   // check if ball is outside the map
   if (ballPos[0] - ballRadius <= 0) {
+    if (!rooms[room][1]) {
+      io.to(room).emit(
+        "message",
+        botScoreMessages[Math.floor(Math.random() * botScoreMessages.length)]
+      );
+    }
+
     gameData[room].player2Score++;
     resetGameData(room);
-    io.to(room).emit("updateScores", gameData[room].player1Score + " - " + gameData[room].player2Score);
+
+
+    if (gameData[room].player2Score == scoreLimit) {
+      if (rooms[room][1]) {
+        io.to(room).emit("ended", rooms[room][1].name);
+      } else {
+        io.to(room).emit("ended", "Bot");
+      }
+      
+      gameData[room].player1Score = 0;
+      gameData[room].player2Score = 0;
+    }
+
+    io.to(room).emit("updateScores", [
+      gameData[room].player1Score,
+      gameData[room].player2Score
+    ]);
+    
     return [ballSpeed, 0];
   } else if (ballPos[0] + ballRadius >= screenSize[0]) {
+    if (!rooms[room][1]) {
+      io.to(room).emit(
+        "message",
+        botLoseMessages[Math.floor(Math.random() * botLoseMessages.length)]
+      );
+    }
+
     gameData[room].player1Score++;
     resetGameData(room);
-    io.to(room).emit("updateScores", gameData[room].player1Score + " - " + gameData[room].player2Score);
+
+    if (gameData[room].player1Score == scoreLimit) {
+      io.to(room).emit("ended", rooms[room][0].name);
+
+      gameData[room].player1Score = 0;
+      gameData[room].player2Score = 0;
+    }
+
+    io.to(room).emit("updateScores", [
+      gameData[room].player1Score,
+      gameData[room].player2Score
+    ]);
+
     return [ballSpeed, 0];
   }
 
@@ -186,8 +260,14 @@ io.on("connection", socket => {
   });
 
   socket.on("start", () => {
-    if (rooms[socket.room][0] == socket && rooms[socket.room].length == 2) {
-      // set the position of the paddles
+    if (rooms[socket.room][0] == socket) {
+      if (rooms[socket.room].length == 1) {
+        io.to(socket.room).emit(
+          "message",
+          botRoasts[Math.floor(Math.random() * botRoasts.length)]
+        );
+      }
+
       let screenSize = rooms[socket.room][smallestScreen[socket.room]].size;
 
       resetGameData(socket.room);
@@ -203,10 +283,22 @@ io.on("connection", socket => {
           gameData[socket.room].player1Pos = endLocation;
 
         // move player 2
-        endLocation =
-          gameData[socket.room].player2Pos +
-          (gameData[socket.room].downs[1] - gameData[socket.room].ups[1]) *
-            speed;
+        if (rooms[socket.room][1]) {
+          // check if you are playing with 2 players
+          endLocation =
+            gameData[socket.room].player2Pos +
+            (gameData[socket.room].downs[1] - gameData[socket.room].ups[1]) *
+              speed;
+        } else {
+          // one player
+          endLocation =
+            gameData[socket.room].player2Pos +
+            ((gameData[socket.room].ballPos[1] >
+              gameData[socket.room].player2Pos + 30) -
+              (gameData[socket.room].ballPos[1] <
+                gameData[socket.room].player2Pos - 30)) *
+              botSpeed;
+        }
 
         if (endLocation >= 30 && endLocation <= screenSize[1] - 30)
           gameData[socket.room].player2Pos = endLocation;

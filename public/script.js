@@ -52,7 +52,7 @@ socket.on("updateBody", body => {
 });
 
 socket.on("updateScores", newScore => {
-  document.getElementById("scores").innerHTML = newScore;
+  document.getElementById("scores").innerHTML = newScore[0] + " - " + newScore[1];
 });
 
 socket.on("setScreenSize", newSize => {
@@ -126,6 +126,10 @@ socket.on("updateUserList", userList => {
   }
 
   document.getElementById("userListContent").innerHTML = output;
+});
+
+socket.on("ended", user => {
+  alert(user + " won!");
 });
 
 socket.on("message", data => {
