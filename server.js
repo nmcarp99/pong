@@ -297,7 +297,7 @@ io.on("connection", socket => {
           gameData[socket.room].player2Pos +
           (gameData[socket.room].downs[1] - gameData[socket.room].ups[1]) *
             speed;
-        if (gameData[socket.room].botEnabled[1]) {
+        if (!rooms[socket.room][1] || gameData[socket.room].botEnabled[1]) {
           // one player
           endLocation +=
             ((gameData[socket.room].ballPos[1] >
