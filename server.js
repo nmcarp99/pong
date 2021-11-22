@@ -35,7 +35,7 @@ const ballRadius = 10;
 const port = 8080;
 
 const speed = 4;
-const botSpeed = 2;
+const botSpeed = 4;
 const angleFactor = 0.07;
 const ballSpeed = 7;
 const refreshDelay = 10;
@@ -80,14 +80,13 @@ function getBallDirection(room) {
     gameData[room].player2Score++;
     resetGameData(room);
 
-
     if (gameData[room].player2Score == scoreLimit) {
       if (rooms[room][1]) {
         io.to(room).emit("ended", rooms[room][1].name);
       } else {
         io.to(room).emit("ended", "Bot");
       }
-      
+
       gameData[room].player1Score = 0;
       gameData[room].player2Score = 0;
     }
@@ -96,7 +95,7 @@ function getBallDirection(room) {
       gameData[room].player1Score,
       gameData[room].player2Score
     ]);
-    
+
     return [ballSpeed, 0];
   } else if (ballPos[0] + ballRadius >= screenSize[0]) {
     if (!rooms[room][1]) {
@@ -187,7 +186,8 @@ function resetGameData(room) {
       ballDirection: [0, 0],
       updateInterval: undefined,
       player1Score: 0,
-      player2Score: 0
+      player2Score: 0,
+      botEnabled: [false, false]
     };
   }
 
@@ -279,25 +279,32 @@ io.on("connection", socket => {
           (gameData[socket.room].downs[0] - gameData[socket.room].ups[0]) *
             speed;
 
+        if (gameData[socket.room].botEnabled[0]) {
+          endLocation +=
+            ((gameData[socket.room].ballPos[1] >
+              gameData[socket.room].player1Pos + 30) -
+              (gameData[socket.room].ballPos[1] <
+                gameData[socket.room].player1Pos - 30)) *
+            speed;
+        }
+
         if (endLocation >= 30 && endLocation <= screenSize[1] - 30)
           gameData[socket.room].player1Pos = endLocation;
 
         // move player 2
-        if (rooms[socket.room][1]) {
-          // check if you are playing with 2 players
-          endLocation =
-            gameData[socket.room].player2Pos +
-            (gameData[socket.room].downs[1] - gameData[socket.room].ups[1]) *
-              speed;
-        } else {
+        // check if you are playing with 2 players
+        endLocation =
+          gameData[socket.room].player2Pos +
+          (gameData[socket.room].downs[1] - gameData[socket.room].ups[1]) *
+            speed;
+        if (gameData[socket.room].botEnabled[1]) {
           // one player
-          endLocation =
-            gameData[socket.room].player2Pos +
+          endLocation +=
             ((gameData[socket.room].ballPos[1] >
               gameData[socket.room].player2Pos + 30) -
               (gameData[socket.room].ballPos[1] <
                 gameData[socket.room].player2Pos - 30)) *
-              botSpeed;
+            botSpeed;
         }
 
         if (endLocation >= 30 && endLocation <= screenSize[1] - 30)
@@ -374,7 +381,21 @@ io.on("connection", socket => {
   });
 
   socket.on("message", data => {
-    io.to(socket.room).emit("message", socket.name + ": " + data);
+    if (data == "//bot") {
+      let player = 1;
+
+      if (rooms[socket.room][0] == socket) {
+        // we are player 1
+        player = 0;
+      }
+
+      gameData[socket.room].botEnabled[player] = !gameData[socket.room]
+        .botEnabled[player];
+
+      socket.emit("message", "Toggled bot...");
+    } else {
+      io.to(socket.room).emit("message", socket.name + ": " + data);
+    }
   });
 
   socket.on("disconnect", () => {
