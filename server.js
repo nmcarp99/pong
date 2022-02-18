@@ -32,7 +32,7 @@ const paddleHeight = 60;
 const paddleWidth = 20;
 const ballRadius = 10;
 
-const port = 8080;
+const port = process.env.PORT;
 
 const speed = 4;
 const botSpeed = 4;
